@@ -1,3 +1,41 @@
+5/5/24
+
+Strategy Order:
+
+    If only 2 cards AND 2 cards are equal (including 2 Aces)
+        Check Split Strategy section for Action
+    
+    If reach here, more than 2 cards OR 2 different cards
+
+    If at least 1 Ace
+        Sum up remaining cards (other Aces are 1)
+        Check Ace Strategy section for Action using sum
+
+    Check Base Strategy section
+
+
+How to structure actual strategy?
+
+- Different rules will have different strategies
+- Card count can even change strategies
+    - Too advanced for now. Stick to basic strategies.
+
+- Actions:
+H: Hit
+S: Stand
+P: Split
+D/H: Double Down if possible, else Hit
+D/S: Double Down if possible, else Stand
+P/H: Split if Double Down after Split possible, else Hit
+R/H: Surrender if possible, else Hit
+
+- *Using 2D array with Action as value
+    - Faster but more memory
+    - Need to separately account for two equal cards for split possibilities, and Ace in hand possibilities
+
+- Using loops and conditions to check for each possible Action
+    - Less memory but slower
+
 Image References:
 
 english_pattern_playing_cards_deck.svg
