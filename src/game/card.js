@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 class Suit {
     static Heart = new Suit('heart');
     static Spade = new Suit('spade');
@@ -18,6 +20,19 @@ class Suit {
                 return '\u2666';
             default:
                 return '\u2663';
+        }
+    }
+
+    static getRandom() {
+        switch (Math.floor(Math.random() * 4)) {
+            case 0:
+                return Suit.Heart;
+            case 1:
+                return Suit.Spade;
+            case 2:
+                return Suit.Diamond;
+            default:
+                return Suit.Club;
         }
     }
 }
@@ -49,10 +64,42 @@ class Rank {
             return this.name[0].toUpperCase();
         }
     }
+
+    static getRandom() {
+        switch (Math.floor(Math.random() * 13)) {
+            case 0:
+                return Rank.Ace;
+            case 1:
+                return Rank.Two;
+            case 2:
+                return Rank.Three;
+            case 3:
+                return Rank.Four;
+            case 4:
+                return Rank.Five;
+            case 5:
+                return Rank.Six;
+            case 6:
+                return Rank.Seven;
+            case 7:
+                return Rank.Eight;
+            case 8:
+                return Rank.Nine;
+            case 9:
+                return Rank.Ten;
+            case 10:
+                return Rank.Jack;
+            case 11:
+                return Rank.Queen;
+            default:
+                return Rank.King;
+        }
+    }
 }
 
 class Card {
     constructor(suit, rank) {
+        this.id = uuidv4();
         this.suit = suit;
         this.rank = rank;
     }
@@ -96,6 +143,10 @@ class Card {
         const playingCardUnicode = String.fromCodePoint(parseInt('1F0' + suit + rank, 16))
 
         return `${this.rank}${this.suit}${playingCardUnicode}`;
+    }
+
+    static getRandom() {
+        return new Card(Suit.getRandom(), Rank.getRandom());
     }
 }
 
