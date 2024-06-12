@@ -1,7 +1,9 @@
 import Card from './card.js';
+import { v4 as uuidv4 } from 'uuid';
 
 class Hand {
     constructor(cardsArr = []) {
+        this.id = uuidv4();
         this.cards = cardsArr;
     }
 
@@ -9,13 +11,15 @@ class Hand {
         return this.cards.map((card) => card.toString()).join(' ');
     }
 
-    addCard(newCard) {
-        // Check if Card object was passed as argument
-        if (!newCard || !(newCard instanceof Card)) {
-            return;
-        }
+    addCard(...newCards) {
+        newCards.forEach((newCard) => {
+            // Check if Card object was passed as argument
+            if (!newCard || !(newCard instanceof Card)) {
+                return;
+            }
 
-        this.cards.push(newCard);
+            this.cards.push(newCard);
+        });
     }
 
     getTotal() {
@@ -71,7 +75,7 @@ class DealerHand extends Hand {
     }
 
     addNewCard(newCard) {
-        super.addNewCard(newCard);
+        super.addCard(newCard);
 
         // If more than 2 cards in Hand, make sure first card is face up
         if (this.cards.length > 2) {
@@ -107,12 +111,32 @@ class DealerHand extends Hand {
     }
 }
 
+/**
+ * - If Hand already has cards, cannot change bet
+ */
 class PlayerHand extends Hand {
-    constructor(player, bet, cardsArr) {
+    constructor(bet, cardsArr = []) {
         super(cardsArr);
-        this.player = player;
-        this.bet = bet;
+
+        this._bet = (bet < 0) ? 0 : bet;
+
         this.hasStand = false;
+    }
+
+    get bet() {
+        return this._bet;
+    }
+
+    set bet(newBet) {
+        /**
+         * Cannot change bet if cards have already been added.
+         * Cannot change bet if newBet is not greater than or equal to zero.
+         */
+        if (this.cards.length !== 0
+            || newBet < 0
+        ) { return; }
+
+        this._bet = newBet;
     }
 
     stand() {
