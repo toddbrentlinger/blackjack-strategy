@@ -1,35 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import GameComponent from './components/Game.jsx';
+import Footer from './components/Footer.jsx';
+import Game from './game/game.js';
+import Icon from './assets/blackjack-strategy-icon.png';
+import './App.scss';
+import { useRef } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const game = useRef(new Game(1));
 
+  // Temp for comparing component state with game module logic
+  window.game = game.current;
+  
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <header>
+        <img id='logo' src={Icon} alt='Blackjack Strategy app icon' width="20px" height="20px" />
+        <h1>Blackjack Strategy</h1>
+      </header>
+      <main>
+        <GameComponent game={game.current} />
+      </main>
+      <Footer initialYear={2024} sourceCodeUrl={'https://github.com/toddbrentlinger/blackjack-strategy'} />
     </>
   )
 }
 
-export default App
+export default App;
