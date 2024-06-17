@@ -1,0 +1,7 @@
+@use 'constants';
+
+.hand {
+    position: relative;
+    height: calc(constants.$card-height * var(--sizeFactor, 1));
+    perspective: calc(constants.$card-width * 4 * var(--sizeFactor, 1));
+}
