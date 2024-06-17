@@ -1,0 +1,120 @@
+@use 'constants';
+
+@mixin cardPosX($n) {
+    background-position-x: calc(((-1 * constants.$card-margin * $n) - (constants.$card-width * ($n - 1))) * var(--sizeFactor, 1));
+}
+
+@mixin cardPosY($n) {
+    background-position-y: calc(((-1 * constants.$card-margin * $n) - (constants.$card-height * ($n - 1))) * var(--sizeFactor, 1));
+}
+
+:root {
+    --sizeFactor: 0.75;
+}
+
+body::before {
+    content: constants.$card-sprite-url;
+    position: absolute;
+    top: -9999rem;
+    left: -9999rem;
+    opacity: 0;
+}
+
+.card {
+    position: absolute;
+    top: 0;
+    
+    background-color: white;
+    background-image: constants.$card-sprite-url;
+    background-size: calc(2838px * var(--sizeFactor, 1));
+
+    width: calc(constants.$card-width * var(--sizeFactor, 1));
+    height: calc(constants.$card-height * var(--sizeFactor, 1));
+    border-radius: calc(constants.$card-margin * var(--sizeFactor, 1));
+    
+    transform-style: preserve-3d;
+    //backface-visibility: hidden;
+
+    // Max 22 cards since 22 Aces is most cards possible with total value > 21
+    @for $i from 1 to 23 {
+        &:nth-child(#{$i}) {
+            left: 1.8 * ($i - 1) * constants.$card-margin;
+        }
+    }
+
+    .card-back {
+        transform: rotateY(180deg);
+        transition: none;
+        backface-visibility: hidden;
+    }
+}
+
+// Card Ranks
+.ace {
+    @include cardPosX($n: 1);
+}
+
+.two {
+    @include cardPosX($n: 2);
+}
+
+.three {
+    @include cardPosX($n: 3);
+}
+
+.four {
+    @include cardPosX($n: 4);
+}
+
+.five {
+    @include cardPosX($n: 5);
+}
+
+.six {
+    @include cardPosX($n: 6);
+}
+
+.seven {
+    @include cardPosX($n: 7);
+}
+
+.eight {
+    @include cardPosX($n: 8);
+}
+
+.nine {
+    @include cardPosX($n: 9);
+}
+
+.ten {
+    @include cardPosX($n: 10);
+}
+
+.jack {
+    @include cardPosX($n: 11);
+}
+
+.queen {
+    @include cardPosX($n: 12);
+}
+
+.king {
+    @include cardPosX($n: 13);
+}
+
+// Card Suits
+.spade {
+    @include cardPosY($n: 1);
+}
+
+.heart {
+    @include cardPosY($n: 2);
+}
+
+.diamond {
+    @include cardPosY($n: 3);
+}
+
+.club {
+    @include cardPosY($n: 4);
+}
