@@ -1,0 +1,14 @@
+.player {
+    border: 2px solid var(--base-white, white);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin: 1rem 0;
+    display: grid;
+    grid-gap: 1rem;
+
+    .player-info {
+        display: grid;
+        grid-auto-flow: column;
+        justify-content: space-between;
+    }
+}
