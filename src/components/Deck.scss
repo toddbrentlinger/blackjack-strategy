@@ -1,0 +1,15 @@
+@use 'constants';
+
+#deck {
+    width: constants.$card-width;
+}
+
+.card {
+    transition: transform 0.5s ease-in-out;
+
+    &.card-back {
+        background-image: url("../assets/playing-card-back-200x300.jpg");
+        background-size: cover;
+        transform: rotateY(180deg);
+    }
+}
