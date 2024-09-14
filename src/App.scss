@@ -6,6 +6,27 @@
     box-shadow: 0 0 $blurRadius var(--base-black, black);
 }
 
+@font-face {
+    font-family: 'PokerInOctober';
+    src: 
+        local('PokerInOctober'),
+        url('../src/fonts/PokerInOctoberDemo-Dxm3.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'CoffeeTin';
+    src: 
+        local('CoffeeTin'),
+        url('../src/fonts/CoffeetinInitials-YXJ2.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'JQKASWild';
+    src: 
+        local('JQKASWild'),
+        url('../src/fonts/JqkasWild-w1YD6.ttf') format('truetype');
+}
+
 :root {
     --base-white: hsl(0, 0%, 95%);
     --base-black: hsl(0, 0%, 10%);
@@ -100,6 +121,7 @@ h1, h2, h3 {
 
 h1 {
     font-size: 2.5rem;
+    font-family: PokerInOctober;
 }
 
 button {
