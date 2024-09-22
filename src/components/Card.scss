@@ -35,6 +35,8 @@ body::before {
     transform-style: preserve-3d;
     //backface-visibility: hidden;
 
+    transition: transform 0.5s ease-in-out;
+
     // Max 22 cards since 22 Aces is most cards possible with total value > 21
     @for $i from 1 to 23 {
         &:nth-child(#{$i}) {
@@ -42,11 +44,25 @@ body::before {
         }
     }
 
-    .card-back {
-        transform: rotateY(180deg);
+    &.card-back {
+        background-image: url("../assets/playing-card-back-200x300.jpg");
+        background-size: cover;
+        //transform: rotateY(180deg);
+    }
+
+    &.no-transition {
         transition: none;
+    }
+
+    .flipping-card-back {
         backface-visibility: hidden;
     }
+
+    // .card-back {
+    //     transform: rotateY(180deg);
+    //     transition: none;
+    //     backface-visibility: hidden;
+    // }
 }
 
 // Card Ranks

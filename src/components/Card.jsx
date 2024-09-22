@@ -31,19 +31,34 @@ class CardDealState {
 }
 
 /** React component for single Card instance. */
-function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0 }) {
+function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0, canPlayerFlip = true }) {
     /** State of Card being dealt. */
     const [cardDealState, setCardDealState] = useState(CardDealState.Initial);
 
     /** State of Card being flipped over. */
-    const [cardFlipState, setCardFlipState] = useState(
-        initialIsFaceUp ? CardFlipState.Front : CardFlipState.Back
-    );
+    const [cardFlipState, setCardFlipState] = useState(CardFlipState.Back);
 
     /** Reference to Card element to apply transform to style. */
     const cardElementRef = useRef(null);
 
+    /** Reference to card back translating from one DOM position to another. */
+    const translatingCardElementRef = useRef(null);
+
+    /** Reference to timeout used for Card component. */
+    const timeoutId = useRef(null);
+
+    // Hooks - useEffect
+
+    // OnComponentUnmount
+    useEffect(() => {
+        // Clear timeout in case it's currently running when component unmounts
+        return () => {
+            clearTimeout(timeoutId.current);
+        };
+    }, []);
+
     /**
+     * Dealing useEffect:
      * When Card is first rendered, it's Deal state is Initial and is rendered 
      * as an empty element in it's final position in some Hand component.
      * When useEffect is first run OnComponentMount, it first applies the 
@@ -60,22 +75,74 @@ function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0 }) {
     useEffect(() => {
         if (cardDealState === CardDealState.Initial) {
             const delta = getDeckDeltaPosition();
+            
+            // Translate card back to deck position without transition (instant translation)
+            translatingCardElementRef.current.style.transition = 'none';
+            translatingCardElementRef.current.style.transform = `translate(${delta.x}px, ${delta.y}px)`;
+            
+            /**
+             * Translating card back is initially hidden to avoid transition 
+             * into initial deck postion from final position. After card back 
+             * is positioned into deck position, make visible in preparation of
+             * next translation into final card position in Player hand.
+             */
+            translatingCardElementRef.current.style.visibility = 'visible';
 
-            cardElementRef.current.style.transform = `translate(-${delta.x}px, -${delta.y}px)`;
-            cardElementRef.current.style.transitionDelay = `${dealDelay}ms`;
-
-            setTimeout(() => {
+            // Change deal state to 'Dealing' after delay
+            timeoutId.current = setTimeout(() => {
                 setCardDealState(CardDealState.Dealing);
             }, dealDelay);
         } else if (cardDealState === CardDealState.Dealing) {
-            cardElementRef.current.style.transform = 'none';
+            // Set style properties to make card back transition from deck to Player hand
+            translatingCardElementRef.current.style.transition = '';
+            translatingCardElementRef.current.style.transform = 'none';
+            
+            // Add event listener to translating card to change properties when transition ends
+            translatingCardElementRef.current.addEventListener('transitionend', () => {
+                // Hide translating card once it transitions to final position in Player hand
+                translatingCardElementRef.current.style.visibility = 'none';
+                
+                // Once transition ends, set deal state to 'Complete' to render final card in Player hand
+                setCardDealState(CardDealState.Complete);
+            });
+        } else { // Else any deal state NOT 'Initial' OR 'Dealing'
+            // If card is initially supposed to be face up, turn face up now
+            if (initialIsFaceUp) {
+                setCardFlipState(CardFlipState.TurningToFront);
+            }
         }
-    }, [cardDealState, dealDelay]);
+    }, [cardDealState, dealDelay, initialIsFaceUp]);
+
+    // Flipping useEffect
+    useEffect(() => {
+        if (cardFlipState === CardFlipState.TurningToFront) {
+            cardElementRef.current.style.transform = 'rotateY(180deg)';
+        } else if (cardFlipState === CardFlipState.TurningToBack) {
+            cardElementRef.current.style.transform = 'rotateY(-180deg)';
+        }
+    }, [cardFlipState]);
+
+    // Methods
+
+    /**
+     * Callback function for User clicking on card to flip.
+     * @param {Event} e - Event object that occurred on the card
+     * @param {CardFlipState} nextState - Next CardFlipState to change the state of the card
+     */
+    const handleFlipClick = function(e, nextState) {
+        e.preventDefault();
+
+        if (!canPlayerFlip) { return; }
+
+        setCardFlipState(nextState);
+    };
 
     /**
      * Returns object with x and y differences in distance from Deck element 
      * and Card's final element position in Player's hand.
-     * @returns {DeltaPosition}
+     * @returns {object} obj
+     * @returns {number} obj.x - Difference in x coordinate of DOM from Deck to final card position
+     * @returns {number} obj.y - Difference in y coordinate of DOM from Deck to final card position
      */
     const getDeckDeltaPosition = function () {
         /** Reference to Deck element in DOM */
@@ -94,8 +161,8 @@ function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0 }) {
 
         // Return differences in x,y positions using ClientRects of Deck and Card
         return {
-            x: cardClientRect.x - deckClientRect.x,
-            y: cardClientRect.y - deckClientRect.y
+            x: deckClientRect.x - cardClientRect.x,
+            y: deckClientRect.y - cardClientRect.y
         };
     };
 
@@ -112,8 +179,12 @@ function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0 }) {
         return (
             <div
                 ref={cardElementRef}
+                style={{ 
+                    transition: 'none',
+                    transform: 'none',
+                }}
                 className={isFaceUp ? `card ${rank} ${suit}` : 'card card-back'}
-                onClick={() => setCardFlipState(nextState)}
+                onClick={(e) => handleFlipClick(e, nextState)}
             ></div>
         );
     };
@@ -125,12 +196,17 @@ function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0 }) {
     const renderTurningToFrontState = function () {
         return (
             <div
-                className={`card ${rank} ${suit}`}
+                ref={cardElementRef}
+                className='card card-back flipping-card-back'
                 onTransitionEnd={() => setCardFlipState(CardFlipState.Front)}
             >
                 <div
-                    style={{ transform: 'rotateY(180deg)' }}
-                    className='card card-back'
+                    style={{ 
+                        //transition: 'none',
+                        transform: 'rotateY(180deg)',
+                        backfaceVisibility: 'hidden', 
+                    }}
+                    className={`card ${rank} ${suit}`}
                 ></div>
             </div>
         );
@@ -143,13 +219,20 @@ function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0 }) {
     const renderTurningToBackState = function () {
         return (
             <div
-                style={{ transform: 'rotateY(180deg)' }}
+                ref={cardElementRef}
+                style={{ 
+                    //transform: 'rotateY(180deg)',
+                    backfaceVisibility: 'hidden',
+                }}
                 className={`card ${rank} ${suit}`}
                 onTransitionEnd={() => setCardFlipState(CardFlipState.Back)}
             >
                 <div
-                    style={{ transform: 'rotateY(180deg)', transition: 'none' }}
-                    className='card card-back'
+                    style={{ 
+                        transform: 'rotateY(180deg)', 
+                        transition: 'none',
+                    }}
+                    className='card card-back flipping-card-back'
                 ></div>
             </div>
         );
@@ -161,10 +244,26 @@ function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0 }) {
      */
     const render = function () {
         // If Card deal state is Initial, render empty Card element before it's dealt
-        if (cardDealState === CardDealState.Initial) {
-            return (<div ref={cardElementRef}></div>);
+        if (cardDealState !== CardDealState.Complete) {
+            return (
+                <div 
+                    ref={cardElementRef} 
+                    className='card'
+                    style={{
+                        visibility: 'hidden'
+                    }}
+                >
+                    <div
+                        ref={translatingCardElementRef}
+                        className='card card-back'
+                        style={{
+                            visibility: 'hidden'
+                        }}
+                    ></div>
+                </div>
+            );
         }
-
+        
         // Else render Card based on flip state
         switch (cardFlipState) {
             case CardFlipState.Front:
