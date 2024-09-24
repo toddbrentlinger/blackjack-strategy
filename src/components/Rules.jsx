@@ -17,21 +17,23 @@ function Rules({ rules }) {
                 <span>Blackjack Payout:</span>
                 <span>{rules.blackjackPayout}</span>
             </div>
-            <div id='stand-on-soft-17'>
-                <span>Dealer Stands On Soft 17?</span>
-                <span>{rules.dealerStandsOnSoft17 ? 'YES' : 'NO'}</span>
-            </div>
-            <div id='double-down-allowed'>
-                <span>Double Down Allowed?</span>
-                <span>{rules.doubleDown.isAllowed ? 'YES' : 'NO'}</span>
-            </div>
-            <div id='splitting-allowed'>
-                <span>Splitting Allowed?</span>
-                <span>{rules.split.isAllowed ? 'YES' : 'NO'}</span>
-            </div>
-            <div id='surrender-allowed'>
-                <span>Surrender Allowed?</span>
-                <span>{rules.isSurrenderAllowed ? 'YES' : 'NO'}</span>
+            <div id='other-rules'>
+                <div id='stand-on-soft-17'>
+                    <span>Dealer Stands On Soft 17?</span>
+                    <span>{rules.dealerStandsOnSoft17 ? 'YES' : 'NO'}</span>
+                </div>
+                <div id='double-down-allowed'>
+                    <span>Double Down Allowed?</span>
+                    <span>{rules.doubleDown.isAllowed ? 'YES' : 'NO'}</span>
+                </div>
+                <div id='splitting-allowed'>
+                    <span>Splitting Allowed?</span>
+                    <span>{rules.split.isAllowed ? 'YES' : 'NO'}</span>
+                </div>
+                <div id='surrender-allowed'>
+                    <span>Surrender Allowed?</span>
+                    <span>{rules.isSurrenderAllowed ? 'YES' : 'NO'}</span>
+                </div>
             </div>
         </section>
     );

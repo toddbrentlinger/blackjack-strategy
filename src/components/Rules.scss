@@ -1,5 +1,6 @@
 #rules {
     margin: 0;
+    font-family: PokerInOctober;
     font-size: 1.7rem;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -7,10 +8,10 @@
         "rules-title rules-title"
         "min-bet max-bet"
         "bj-payout bj-payout"
-        "stand-on-soft-17 double-down-allowed"
-        "splitting-allowed surrender-allowed";
+        "other-rules other-rules";
     align-content: space-between;
     justify-items: center;
+    gap: 0;
 
     #rules-title {
         grid-area: rules-title;
@@ -28,25 +29,44 @@
         grid-area: bj-payout;
     }
 
-    #stand-on-soft-17 {
-        grid-area: stand-on-soft-17;
-    }
-
-    #double-down-allowed {
-        grid-area: double-down-allowed;
-    }
-
-    #splitting-allowed {
-        grid-area: splitting-allowed;
-    }
-
-    #surrender-allowed {
-        grid-area: surrender-allowed;
-    }
-
-    & > div {
+    #other-rules {
+        grid-area: other-rules;
         display: grid;
-        grid-auto-flow: column;
-        gap: 0.5em;
+        grid-template-areas: 
+            "stand-on-soft-17 double-down-allowed"
+            "splitting-allowed surrender-allowed";
+        gap: 1rem;
+
+        & > div {
+            display: grid;
+            justify-content: center;
+            justify-items: center;
+
+            & > span:first-child {
+                white-space: nowrap;
+            }
+        }
+
+        #stand-on-soft-17 {
+            grid-area: stand-on-soft-17;
+        }
+    
+        #double-down-allowed {
+            grid-area: double-down-allowed;
+        }
+    
+        #splitting-allowed {
+            grid-area: splitting-allowed;
+        }
+    
+        #surrender-allowed {
+            grid-area: surrender-allowed;
+        }
     }
+
+    // & > div {
+    //     display: grid;
+    //     grid-auto-flow: column;
+    //     gap: 0.5em;
+    // }
 }
