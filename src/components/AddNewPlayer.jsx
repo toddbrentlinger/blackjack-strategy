@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Player from "../game/player";
 
+/** Default values object for AddNewPlayer form component. */
 const formDataInit = { name: '', bankroll: 0 };
 
 /** React component to add new Player to game. */
@@ -59,11 +60,24 @@ function AddNewPlayer({ handleAddNewPlayer }) {
             <form onSubmit={handleAddNewPlayerFormSubmit} action="" method="post">
                 <label>
                     Name:
-                    <input name="name" value={formData.name} onChange={handleInputChange} autoFocus={true} />
+                    <input 
+                        name="name" 
+                        value={formData.name} 
+                        onChange={handleInputChange} 
+                        autoFocus={true} 
+                        required
+                    />
                 </label>
                 <label>
                     Bankroll:
-                    <input type="number" name="bankroll" value={formData.bankroll} onChange={handleInputChange} />
+                    <input 
+                        type="number" 
+                        name="bankroll" 
+                        min={formDataInit.bankroll}
+                        value={formData.bankroll} 
+                        onChange={handleInputChange}
+                        required
+                    />
                 </label>
                 <button>Add Player</button>
             </form>
