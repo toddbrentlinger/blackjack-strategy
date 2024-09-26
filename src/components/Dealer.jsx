@@ -8,7 +8,11 @@ function Dealer({ cards }) {
      */
     const renderHand = function() {
         // If NO cards, render nothing
-        if (cards.length === 0) { return; }
+        if (cards.length === 0) { 
+            return (
+                <div className='hand'></div>
+            ); 
+        }
         
         return (
             <Hand
@@ -18,6 +22,7 @@ function Dealer({ cards }) {
                     hasStand: false,
                     cards: cards,
                 }}
+                canPlayerFlip={false}
             />
         );
     };
