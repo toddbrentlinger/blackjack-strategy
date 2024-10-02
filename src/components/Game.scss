@@ -1,0 +1,35 @@
+@use 'constants';
+
+main {
+    display: grid;
+    grid-template-rows: calc(constants.$card-height * var(--sizeFactor, 1));
+    grid-template-columns: min-content 1fr;
+    grid-template-areas: 
+        "deck rules"
+        "msg msg"
+        "dealer dealer"
+        "players players";
+
+    #deck {
+        grid-area: deck;
+    }
+
+    #msg {
+        grid-area: msg;
+        display: grid;
+        justify-items: center;
+        align-items: center;
+    }
+
+    #rules {
+        grid-area: rules;
+    }
+
+    #dealer {
+        grid-area: dealer;
+    }
+
+    #players {
+        grid-area: players;
+    }
+}
