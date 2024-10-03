@@ -1,3 +1,48 @@
+Files Not Used:
+
+index.css (all styling used in App.scss)
+utilities.js (single function not used)
+AllCards.jsx
+AllCards.scss
+Card copy.scss
+errorTypes.js
+
+_______________________________________________________________________________
+
+7/28/24
+
+- Set card obect in cards array to null to make the 
+card translate off screen or returned to deck. When array
+value is completely removed, the card object is removed from
+DOM when in it's final "removed-from-deck" position.
+
+7/10/24
+
+ISSUE: If last player last hand is natural blackjack, their turn does NOT automatically skip like
+other players with natural blackjack.
+
+6/26/24
+
+ISSUE: When all players, or only one player, has blackjack. GameState of
+PlayerPlaying should be skipped entirely. Currently, game asks last Player
+for an action when they already have blackjack.
+
+6/20/24
+
+Reddit Comment:
+It’s pretty simple. Soft 16s and less: dealer hits. Soft 18 and higher: dealer 
+stands. Soft 17: depends on if the game is H17 or S17.
+If the dealer has a soft 14, hits, and gets a 10, they now a soft 24 or a hard 
+14. Just like the player, the dealer now treats it as a hard 14 and hits again.
+
+
+6/13/24
+
+- Maybe better to deal all Cards by sending to Deck. Inside deck, they transition
+from deck to final position (pass x,y coords as props). Once they arrive at their
+final position, it disappears to allow final Card to stay in PlayerHand component.
+    - Create new DealingCard component?
+
 5/5/24
 
 Strategy Order:
@@ -49,3 +94,11 @@ https://www.rawpixel.com/image/5962730/free-public-domain-cc0-photo
 
 icon
 https://www.rawpixel.com/image/6330558/image-sticker-public-domain-illustrations
+
+Font References:
+
+- Poker In October by Roland Huse Design from https://www.fontspace.com/poker-in-october-demo-font-f30724
+
+- Coffee Tin by Rick Mueller from https://www.fontspace.com/coffee-tin-font-f5796
+
+- JQKAS Wild by Chequered Ink from https://www.fontspace.com/jqkas-wild-font-f96423
