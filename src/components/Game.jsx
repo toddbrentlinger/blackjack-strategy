@@ -178,6 +178,7 @@ function Game({ game }) {
                 // If Player state object was found, set isPlayerTurn flag to true
                 if (playerObj !== undefined) {
                     playerObj.isPlayerTurn = true;
+                    playerObj.activeHandIndex = game.currentPlayer.activeHandIndex;
                 } else {
                     console.error('Matching first Player NOT found!');
                 }
@@ -228,11 +229,81 @@ function Game({ game }) {
     };
 
     /**
+     * Returns object in PlayersState that corresponds to matching Player instance.
+     * @param {Array} newPlayersState - Deep copy of PlayersState array
+     * @param {Player} player  - Reference to Player instance
+     * @returns {Object|undefined}
+     */
+    const getPlayerStateObj = function(newPlayersState, player) {
+        /**
+         * Find Player object in state with matching first valid Player from 
+         * game module OR undefined if no matching Player found.
+         */
+        return newPlayersState
+            .find((currPlayerObj) => (currPlayerObj.player.id === player.id));
+    };
+
+    /**
+     * Updates specific Player state basic properties and switches to different 
+     * Player or starts Dealer play depending on Player's updated data.
+     * @param {Array} newPlayersState - Deep copy of PlayersState array
+     * @param {Player} player - Reference to Player instance
+     * @returns {Object|undefined}
+     */
+    const updatePlayersStateAfterPlayerAction = function(newPlayersState, player) {
+        // Find Player object in state with matching first valid Player from game module
+        const playerObj = getPlayerStateObj(newPlayersState, player);
+
+        // If NO matching Player object, return state unchanged
+        if (playerObj === undefined) {
+            return;
+        }
+
+        // Set Player activeHandIndex in case Player bust
+        playerObj.activeHandIndex = player.activeHandIndex;
+
+        // If Player turn is over, change current Player
+        
+        const currentPlayer = game.currentPlayer;
+
+        // If no more Player turns, it's Dealer's turn
+        if (currentPlayer === null) {
+            playerObj.isPlayerTurn = false;
+
+            // Set game state to DealerPlaying
+            setGameState(game.state);
+
+            handleDealerPlay();
+        }
+        // Else If it is a new Player's turn
+        else if ((currentPlayer !== player)) {
+            // Set previous Player isPlayerTurn flag to false
+            playerObj.isPlayerTurn = false;
+
+            // Find new Player object
+            const newPlayerObj = newPlayersState
+                .find((currPlayerObj) => (currPlayerObj.player.id === currentPlayer.id));
+
+            // If new Player state object was found, set isPlayerTurn flag to true AND update activeHandIndex
+            if (newPlayerObj !== undefined) {
+                newPlayerObj.isPlayerTurn = true;
+                newPlayerObj.activeHandIndex = currentPlayer.activeHandIndex;
+            } else {
+                console.error('Matching next Player NOT found!');
+            }
+        }
+
+        return playerObj;
+    };
+
+    /**
      * Handles Player hitting on their current hand
      * @param {Player} player - Reference to Player instance
      */
     const handleHit = function(player) {
-        /** Current PlayerHand of the Player passed as argument */
+        /** Current PlayerHand of the Player passed as argument. Get reference 
+         * now because it may change if current hand busts after hitting. 
+         */
         const currentHand = player.currentHand;
 
         // Use Game instance to make specified Player hit their current hand
@@ -241,42 +312,11 @@ function Game({ game }) {
         // Update PlayersState with outcome of Player hitting using Game instance
         setPlayersState((prevPlayersState) => {
             const newState = [...prevPlayersState];
-                
-            // Find Player object in state with matching first valid Player from game module
-            const playerObj = newState.find((currPlayerObj) => (currPlayerObj.player.id === player.id));
 
-            // If NO matching Player object, return state unchanged
+            const playerObj = updatePlayersStateAfterPlayerAction(newState, player);
+                
             if (playerObj === undefined) {
                 return newState;
-            }
-
-            // Set Player activeHandIndex in case Player split
-            playerObj.activeHandIndex = player.activeHandIndex;
-
-            // If Player turn is over, change current Player
-            const currentPlayer = game.currentPlayer;
-            if (currentPlayer === null) {
-                playerObj.isPlayerTurn = false;
-
-                // Set game state to DealerPlaying
-                setGameState(game.state);
-
-                handleDealerPlay();
-            }
-            // Else If it is a new Player's turn
-            else if ((currentPlayer !== player)) {
-                // Set previous Player isPlayerTurn flag to false
-                playerObj.isPlayerTurn = false;
-
-                // Find new Player object
-                const newPlayerObj = newState.find((currPlayerObj) => (currPlayerObj.player.id === currentPlayer.id));
-
-                // If new Player state object was found, set isPlayerTurn flag to true
-                if (newPlayerObj !== undefined) {
-                    newPlayerObj.isPlayerTurn = true;
-                } else {
-                    console.error('Matching next Player NOT found!');
-                }
             }
             
             // Find Hand object in state that a Card was added to through hitting
@@ -313,52 +353,9 @@ function Game({ game }) {
         
         // Update PlayersState with outcome of Player standing using Game instance
         setPlayersState((prevPlayersState) => {
-            /**
-             * TODO Start - separate script into separate function since 
-             * it's repeated in handleHit
-             */
-
             const newState = [...prevPlayersState];
-                
-            // Find Player object in state with matching first valid Player from game module
-            const playerObj = newState.find((currPlayerObj) => (currPlayerObj.player.id === player.id));
-
-            // If NO matching Player object, return state unchanged
-            if (playerObj === undefined) {
-                return newState;
-            }
-
-            // Set Player activeHandIndex in case Player split
-            playerObj.activeHandIndex = player.activeHandIndex;
-
-            // If Player turn is over, change current Player
-            // TODO START: Could instead check game.state === GameState.DealerPlaying
-            const currentPlayer = game.currentPlayer;
-            if (currentPlayer === null) {
-                playerObj.isPlayerTurn = false;
-
-                // Set game state to DealerPlaying
-                setGameState(game.state);
-
-                handleDealerPlay();
-            }
-            // Else If it is a new Player's turn
-            else if ((currentPlayer !== player)) {
-                // Set previous Player isPlayerTurn flag to false
-                playerObj.isPlayerTurn = false;
-
-                // Find new Player object
-                const newPlayerObj = newState.find((currPlayerObj) => (currPlayerObj.player.id === currentPlayer.id));
-
-                // If new Player state object was found, set isPlayerTurn flag to true
-                if (newPlayerObj !== undefined) {
-                    newPlayerObj.isPlayerTurn = true;
-                } else {
-                    console.error('Matching next Player NOT found!');
-                }
-            }
-
-            // TODO END
+            
+            updatePlayersStateAfterPlayerAction(newState, player);
 
             return newState;
         });
@@ -379,41 +376,10 @@ function Game({ game }) {
         setPlayersState((prevPlayersState) => {
             const newState = [...prevPlayersState];
                 
-            // Find Player object in state with matching first valid Player from game module
-            const playerObj = newState.find((currPlayerObj) => (currPlayerObj.player.id === player.id));
-
-            // If NO matching Player object, return state unchanged
+            const playerObj = updatePlayersStateAfterPlayerAction(newState, player);
+                
             if (playerObj === undefined) {
                 return newState;
-            }
-
-            // Set Player activeHandIndex since double down completes hand
-            playerObj.activeHandIndex = player.activeHandIndex;
-
-            // If Player turn is over, change current Player
-            const currentPlayer = game.currentPlayer;
-            if (currentPlayer === null) {
-                playerObj.isPlayerTurn = false;
-
-                // Set game state to DealerPlaying
-                setGameState(game.state);
-
-                handleDealerPlay();
-            }
-            // Else If it is a new Player's turn
-            else if ((currentPlayer !== player)) {
-                // Set previous Player isPlayerTurn flag to false
-                playerObj.isPlayerTurn = false;
-
-                // Find new Player object
-                const newPlayerObj = newState.find((currPlayerObj) => (currPlayerObj.player.id === currentPlayer.id));
-
-                // If new Player state object was found, set isPlayerTurn flag to true
-                if (newPlayerObj !== undefined) {
-                    newPlayerObj.isPlayerTurn = true;
-                } else {
-                    console.error('Matching next Player NOT found!');
-                }
             }
             
             // Find Hand object in state that a Card was added to through doubling down
@@ -438,7 +404,7 @@ function Game({ game }) {
 
             return newState;
         });
-    }
+    };
 
     /**
      * Handles Player splitting their current hand
@@ -455,49 +421,13 @@ function Game({ game }) {
         
         // Update PlayersState with outcome of Player splitting using Game instance
         setPlayersState((prevPlayersState) => {
-            // TODO: Start - separate script into separate function since
-            // it's repeated in handleHit
-
             const newState = [...prevPlayersState];
                 
-            // Find Player object in state with matching first valid Player from game module
-            const playerObj = newState.find((currPlayerObj) => (currPlayerObj.player.id === player.id));
-
-            // If NO matching Player object, return state unchanged
+            const playerObj = updatePlayersStateAfterPlayerAction(newState, player);
+                
             if (playerObj === undefined) {
                 return newState;
             }
-
-            // Set Player activeHandIndex in case Player split and got natural blackjack on first hand
-            playerObj.activeHandIndex = player.activeHandIndex;
-
-            // If Player turn is over, change current Player (ex. in case split
-            // leads to two different blackjacks)
-            const currentPlayer = game.currentPlayer;
-            if (currentPlayer === null) {
-                playerObj.isPlayerTurn = false;
-
-                // Set game state to DealerPlaying
-                setGameState(game.state);
-
-                handleDealerPlay();
-            }
-            // Else If it is a new Player's turn
-            else if ((currentPlayer !== player)) {
-                playerObj.isPlayerTurn = false;
-
-                // Find new Player object
-                const newPlayerObj = newState.find((currPlayerObj) => (currPlayerObj.player.id === currentPlayer.id));
-
-                // If new Player state object was found, set isPlayerTurn flag to true
-                if (newPlayerObj !== undefined) {
-                    newPlayerObj.isPlayerTurn = true;
-                } else {
-                    console.error('Matching next Player NOT found!');
-                }
-            }
-
-            // TODO: END
 
             /** Current PlayerHand of the Player passed as argument */
             const currentHand = player.getIthHand(currentHandIndex);
@@ -527,9 +457,6 @@ function Game({ game }) {
                 ...handObj.cards,
                 createCardStateObj(card),
             ];
-            // handObj.cards.push(
-            //     createCardStateObj(card)
-            // );
 
             // Guaranteed to be extra hand after current hand is split
             const nextHand = player.getIthHand(currentHandIndex + 1);
@@ -554,10 +481,16 @@ function Game({ game }) {
      * @param {Player} player - Reference to Player instance
      */
     const handleSurrender = function(player) {
-        // TODO...
-
         // Use Game instance to make specified Player surrender their current hand
         game.surrender(player);
+
+        setPlayersState((prevPlayersState) => {
+            const newState = [...prevPlayersState];
+
+            updatePlayersStateAfterPlayerAction(newState, player);
+
+            return newState;
+        });
     };
 
     /**
@@ -576,6 +509,9 @@ function Game({ game }) {
         // Update DealerCards state with outcome of Dealer playing using Game instance
         setDealerCards((prevDealerCards) => {
             const newDealerCards = [...prevDealerCards];
+
+            // Flip face down card
+            newDealerCards[1].initialIsFaceUp = true;
 
             // Add each card in Dealer's hand
             let card;
@@ -599,7 +535,7 @@ function Game({ game }) {
         // End game round after Dealer's cards are dealt using setTimeout
         timeoutId.current = setTimeout(() => {
             handleEndRound();
-        }, DEAL_INTERVAL * game.dealerHand.cards.length);
+        }, DEAL_INTERVAL * game.dealerHand.cards.length + 3000);
     };
 
     /** Handles end of single round of game. */
