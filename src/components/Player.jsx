@@ -176,8 +176,12 @@ function Player({ playerObj, gameState, minBet, handleBet, handleHit, handleStan
     const renderHands = function() {
         if (playerObj.hands.length === 0) { return null; }
         
-        return playerObj.hands.map((handObj) => (
-            <Hand key={handObj.hand.id} handObj={handObj} />
+        return playerObj.hands.map((handObj, index) => (
+            <Hand 
+                key={handObj.hand.id} 
+                handObj={handObj} 
+                isActive={(index === playerObj.activeHandIndex)}
+            />
         ));
     };
 

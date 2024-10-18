@@ -4,4 +4,11 @@
     position: relative;
     height: calc(constants.$card-height * var(--sizeFactor, 1));
     perspective: calc(constants.$card-width * 4 * var(--sizeFactor, 1));
+    border-radius: calc(constants.$card-margin * var(--sizeFactor, 1));
+    border: 2px solid transparent;
+    transition: border-color 300ms ease-in-out;
+
+    &.active-hand {
+        border: 2px solid white;   
+    }
 }

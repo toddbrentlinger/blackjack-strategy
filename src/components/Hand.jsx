@@ -1,10 +1,10 @@
 import Card from './Card';
 import './Hand.scss';
 
-function Hand({ handObj, canPlayerFlip = true}) {
+function Hand({ handObj, canPlayerFlip = true, isActive = false}) {
     return (
         <div className="hand-container">
-            <div className="hand">
+            <div className={isActive ? "active-hand hand" : "hand"}>
                 {
                     handObj.cards.map((cardObj) => (
                         <Card 
