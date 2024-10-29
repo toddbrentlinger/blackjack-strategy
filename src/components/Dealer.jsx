@@ -20,6 +20,7 @@ function Dealer({ cards }) {
                     hand: null,
                     bet: 0,
                     hasStand: false,
+                    state: null,
                     cards: cards,
                 }}
                 canPlayerFlip={false}

@@ -17,6 +17,13 @@ function Hand({ handObj, canPlayerFlip = true, isActive = false}) {
                         />
                     ))
                 }
+                {
+                    (handObj.state === null)
+                        ? null
+                        : (
+                            <div className="hand-state-msg">{handObj.state.name}</div>
+                        )
+                }
             </div>
             {
                 (handObj.hand === null)

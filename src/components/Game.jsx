@@ -13,6 +13,23 @@ import './Game.scss';
 /** Time interval between new cards being dealt. */
 const DEAL_INTERVAL = 500;
 
+/** Enumerator for current state of a single Hand of Blackjack. */
+class HandState {
+    static Blackjack = new HandState('blackjack');
+    static Bust = new HandState('bust');
+    static Playing = new HandState('playing');
+    static Stand = new HandState('stand');
+    static Surrender = new HandState('surrender');
+
+    /**
+     * @constructor
+     * @param {string} name 
+     */
+    constructor(name) {
+        this.name = name;
+    }
+}
+
 /** React component for single Game instance. */
 function Game({ game }) {
     // Hooks - useState
@@ -36,6 +53,7 @@ function Game({ game }) {
                     hand: PlayerHand,
                     bet: 0,
                     hasStand: false,
+                    state: HandState.Playing,
                     cards: [
                         {
                             card: Card,
@@ -141,6 +159,9 @@ function Game({ game }) {
                     hand: playerObj.player.hands[0],
                     bet: playerObj.player.hands[0].bet,
                     hasStand: playerObj.player.hands[0].hasStand,
+                    state: playerObj.player.hands[0].hasBlackjack() 
+                        ? HandState.Blackjack 
+                        : HandState.Playing,
                     cards: [
                         createCardStateObj(
                             playerObj.player.hands[0].cards[0],
@@ -210,7 +231,7 @@ function Game({ game }) {
                 player: player,
                 name: player.name,
                 bankroll: player.bankroll,
-                hands: player.hands,
+                hands: [],
                 activeHandIndex: player.activeHandIndex,
                 isPlayerTurn: false,
             }
@@ -339,6 +360,13 @@ function Game({ game }) {
                 createCardStateObj(card),
             ];
 
+            // Update Hand state (Playing, Bust, or Blackjack)
+            if (handObj.hand.hasBlackjack()) {
+                handObj.state = HandState.Blackjack;
+            } else if (handObj.hand.isBust()) {
+                handObj.state = HandState.Bust;
+            }
+
             return newState;
         });
     };
@@ -348,6 +376,9 @@ function Game({ game }) {
      * @param {Player} player - Reference to Player instance
      */
     const handleStand = function(player) {
+        /** Current PlayerHand of the Player passed as argument */
+        const currentHand = player.currentHand;
+
         // Use Game instance to make specified Player stand their current hand
         game.stand(player);
         
@@ -355,7 +386,18 @@ function Game({ game }) {
         setPlayersState((prevPlayersState) => {
             const newState = [...prevPlayersState];
             
-            updatePlayersStateAfterPlayerAction(newState, player);
+            const playerObj = updatePlayersStateAfterPlayerAction(newState, player);
+
+            // Find Hand object in state that a Card was added to through hitting
+            const handObj = playerObj.hands.find((currHandObj) => (currHandObj.hand.id === currentHand.id));
+
+            // If NO matching Hand object, return state only changing Player data
+            if (handObj === undefined) {
+                return newState;
+            }
+
+            // Update Hand state (Stand)
+            handObj.state = HandState.Stand;
 
             return newState;
         });
@@ -366,7 +408,9 @@ function Game({ game }) {
      * @param {Player} player - Reference to Player instance
      */
     const handleDoubleDown = function(player) {
-        /** Current PlayerHand of the Player passed as argument */
+        /** Current PlayerHand of the Player passed as argument. Get reference 
+         * now because it may change if current hand busts after double down. 
+         */
         const currentHand = player.currentHand;
 
         // Use Game instance to make specified Player double down their current hand
@@ -401,6 +445,15 @@ function Game({ game }) {
                 ...handObj.cards,
                 createCardStateObj(card),
             ];
+
+            // Update Hand state (Stand, Bust, or Blackjack)
+            if (handObj.hand.hasBlackjack()) {
+                handObj.state = HandState.Blackjack;
+            } else if (handObj.hand.isBust()) {
+                handObj.state = HandState.Bust;
+            } else {
+                handObj.state = HandState.Stand;
+            }
 
             return newState;
         });
@@ -458,6 +511,11 @@ function Game({ game }) {
                 createCardStateObj(card),
             ];
 
+            // Update Hand state (Playing or Blackjack)
+            if (handObj.hand.hasBlackjack()) {
+                handObj.state = HandState.Blackjack;
+            }
+
             // Guaranteed to be extra hand after current hand is split
             const nextHand = player.getIthHand(currentHandIndex + 1);
 
@@ -466,6 +524,9 @@ function Game({ game }) {
                 hand: nextHand,
                 bet: nextHand.bet,
                 hasStand: nextHand.hasStand,
+                state: nextHand.hasBlackjack() 
+                    ? HandState.Blackjack 
+                    : HandState.Playing,
                 cards: [
                     createCardStateObj(nextHand.cards[0]),
                     createCardStateObj(nextHand.cards[1], DEAL_INTERVAL * 3),
@@ -481,13 +542,27 @@ function Game({ game }) {
      * @param {Player} player - Reference to Player instance
      */
     const handleSurrender = function(player) {
+        /** Current PlayerHand of the Player passed as argument */
+        const currentHand = player.currentHand;
+
         // Use Game instance to make specified Player surrender their current hand
         game.surrender(player);
 
         setPlayersState((prevPlayersState) => {
             const newState = [...prevPlayersState];
 
-            updatePlayersStateAfterPlayerAction(newState, player);
+            const playerObj = updatePlayersStateAfterPlayerAction(newState, player);
+
+            // Find Hand object in state that a Card was added to through hitting
+            const handObj = playerObj.hands.find((currHandObj) => (currHandObj.hand.id === currentHand.id));
+
+            // If NO matching Hand object, return state only changing Player data
+            if (handObj === undefined) {
+                return newState;
+            }
+
+            // Update Hand state (Surrender)
+            handObj.state = HandState.Surrender;
 
             return newState;
         });

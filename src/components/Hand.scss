@@ -12,3 +12,17 @@
         border: 2px solid white;   
     }
 }
+
+.hand-state-msg {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+    color: var(--base-black, black);
+    font-size: 3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: capitalize;
+}
