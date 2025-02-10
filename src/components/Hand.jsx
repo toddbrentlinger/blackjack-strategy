@@ -13,6 +13,7 @@ function Hand({ handObj, canPlayerFlip = true, isActive = false}) {
                             key={cardObj.card.id} 
                             initialIsFaceUp={cardObj.initialIsFaceUp}
                             dealDelay={cardObj.dealDelay}
+                            isCleanup={cardObj.isCleanup}
                             canPlayerFlip={canPlayerFlip}
                         />
                     ))

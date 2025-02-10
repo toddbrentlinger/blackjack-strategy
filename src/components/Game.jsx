@@ -59,6 +59,7 @@ function Game({ game }) {
                             card: Card,
                             initialIsFaceUp: true,
                             dealDelay: 0,
+                            isCleanup: false,
                         }
                     ]
                 }
@@ -628,7 +629,13 @@ function Game({ game }) {
             for (const playerObj of newState) {
                 // Update Player state with known data
                 playerObj.activeHandIndex = -1;
-                playerObj.hands = [];
+                
+                // Set isCleanup state to true for each Player Card to start cleanup
+                for (const handObj of playerObj.hands) {
+                    for (const cardObj of handObj.cards) {
+                        cardObj.isCleanup = true;
+                    }
+                }
 
                 // Update Player state with unknown data
                 playerObj.bankroll = playerObj.player.bankroll;
@@ -637,11 +644,34 @@ function Game({ game }) {
             return newState;
         });
 
-        // Reset Dealer cards state to empty array for next round
-        setDealerCards([]);
+        // Set isCleanup state to true for each Dealer Card to start cleanup
+        setDealerCards((prevDealerCards) => {
+            const newState = [...prevDealerCards];
+
+            for (const cardObj of newState) {
+                cardObj.isCleanup = true;
+            }
+
+            return newState;
+        });
 
         // Start new round after all Cards are removed using setTimeout
         timeoutId.current = setTimeout(() => {
+            // Reset Player hands to empty array for next round
+            setPlayersState((prevPlayersState) => {
+                const newState = [...prevPlayersState];
+    
+                for (const playerObj of newState) {
+                    // Update Player state with known data
+                    playerObj.hands = [];
+                }
+    
+                return newState;
+            });
+
+            // Reset Dealer cards state to empty array for next round
+            setDealerCards([]);
+
             // Use Game instance to start new game round
             game.startRound();
 

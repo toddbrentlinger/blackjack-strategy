@@ -30,8 +30,21 @@ class CardDealState {
     }
 }
 
+/** Enum class for state of Card component being removed from the PlayerHand components. */
+class CardCleanupState {
+    static Initial = new CardCleanupState('initial');
+    static Complete = new CardCleanupState('complete');
+
+    constructor(name) {
+        this.name = name;
+    }
+}
+
 /** React component for single Card instance. */
-function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0, canPlayerFlip = true }) {
+function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0, canPlayerFlip = true, isCleanup = false }) {
+    /** State of Card being removed frm the PlayerHand during cleanup. */
+    const [cardCleanupState, setCardCleanupState] = useState(CardCleanupState.Initial);
+    
     /** State of Card being dealt. */
     const [cardDealState, setCardDealState] = useState(CardDealState.Initial);
 
@@ -56,6 +69,34 @@ function Card({ rank, suit, initialIsFaceUp = true, dealDelay = 0, canPlayerFlip
             clearTimeout(timeoutId.current);
         };
     }, []);
+
+    /**
+     * Cleanup useEffect:
+     */
+    useEffect(() => {
+        if (!isCleanup) {
+            return;
+        }
+
+        if (cardCleanupState === CardCleanupState.Initial) {
+            // Find horizontal translation for card to clear the window
+            const cardBoundingClientRect = cardElementRef.current.getBoundingClientRect();
+            const deltaX = -2 * (cardBoundingClientRect.x + cardBoundingClientRect.width);
+
+            // Translate card away from Hand to clear the window
+            cardElementRef.current.style.transition = '';
+            cardElementRef.current.style.transform = `translate(${deltaX}px)`;
+
+            // Add event listener to translating card to change properties when transition ends
+            cardElementRef.current.addEventListener('transitionend', () => {
+                // Hide translating card once it transitions to final position in Player hand
+                cardElementRef.current.style.visibility = 'none';
+                
+                // Once transition ends, set deal state to 'Complete' to render final card in Player hand
+                setCardCleanupState(CardCleanupState.Complete);
+            });
+        }
+    }, [isCleanup, cardCleanupState]);
 
     /**
      * Dealing useEffect:
